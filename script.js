@@ -1,0 +1,898 @@
+/*
+    Autor: Gustavo Santos de Oliveira
+    Arquivo: script.js
+    Descrição:  
+*///dados temporarios
+
+let usuario = null;
+let selec_ins = null;
+let selec_cur = null;
+let selec_dis = null;
+let selec_tur = null;
+
+// Função para inicializar todos os event listeners
+function inicializarEventListeners() {
+    // Event listeners para instituições
+    const enviarInstituicaoBtn = document.getElementById("enviar-instituicao");
+    if (enviarInstituicaoBtn) {
+        enviarInstituicaoBtn.addEventListener('click', (e) => {
+            e.preventDefault();
+            const nome = document.getElementById("nome-instituicao").value;
+
+            enviarinstituicao(nome).then(resultado => {
+                if(resultado && resultado.confirm){
+                    atualizarinstituicoes();
+                    document.getElementById("confirm-instituicao").innerText = "instituição adicionada";
+                } else {
+                    document.getElementById("confirm-instituicao").innerText = "não foi possivel criar a instituição";
+                }
+            });
+        });
+    }
+
+    const excluirInstituicaoBtn = document.getElementById("excluir-instituicao");
+    if (excluirInstituicaoBtn) {
+        excluirInstituicaoBtn.addEventListener('click', (e) => {
+            e.preventDefault();
+            const nome = document.getElementById("nome-instituicao").value;
+
+            excluirinstituicao(nome).then(resultado => {
+                if(resultado && resultado.confirm){
+                    atualizarinstituicoes();
+                    document.getElementById("confirm-instituicao").innerText = "instituição excluida";
+                } else {
+                    document.getElementById("confirm-instituicao").innerText = "não foi possivel excluir a instituição";
+                }
+            });
+        });
+    }
+
+    // Event listeners para cursos
+    const enviarCursoBtn = document.getElementById("enviar-curso");
+    if (enviarCursoBtn) {
+        enviarCursoBtn.addEventListener('click', (e) => {
+            e.preventDefault();
+            const nome = document.getElementById("nome-curso").value;
+
+            enviarcurso(nome).then(resultado => {
+                if(resultado && resultado.confirm){
+                    atualizarcursos();
+                    document.getElementById("confirm-curso").innerText = resultado.mensagem || "Curso adicionado";
+                } else {
+                    document.getElementById("confirm-curso").innerText = resultado ? resultado.mensagem : "Erro ao adicionar curso";
+                }
+            });
+        });
+    }
+
+    const excluirCursoBtn = document.getElementById("excluir-curso");
+    if (excluirCursoBtn) {
+        excluirCursoBtn.addEventListener('click', (e) => {
+            e.preventDefault();
+            const nome = document.getElementById("nome-curso").value;
+
+            excluircurso(nome).then(resultado => {
+                if(resultado && resultado.confirm){
+                    atualizarcursos();
+                    document.getElementById("confirm-curso").innerText = resultado.mensagem || "Curso excluído";
+                } else {
+                    document.getElementById("confirm-curso").innerText = resultado ? resultado.mensagem : "Erro ao excluir curso";
+                }
+            });
+        });
+    }
+
+    // Event listeners para disciplinas
+    const enviarDisciplinaBtn = document.getElementById("enviar-disciplina");
+    if (enviarDisciplinaBtn) {
+        enviarDisciplinaBtn.addEventListener('click', (e) => {
+            e.preventDefault();
+            const sigla = document.getElementById("sigla-disciplina").value;
+            const nome = document.getElementById("nome-disciplina").value;
+            const periodo = document.getElementById("periodo-disciplina").value;
+
+            enviardiscplina(sigla, nome, periodo).then(resultado => {
+                if(resultado && resultado.confirm){
+                    atualizardisciplinas();
+                    document.getElementById("confirm-disciplina").innerText = resultado.mensagem || "Disciplina adicionada";
+                } else {
+                    document.getElementById("confirm-disciplina").innerText = resultado ? resultado.mensagem : "Erro ao adicionar disciplina";
+                }
+            });
+        });
+    }
+
+    const excluirDisciplinaBtn = document.getElementById("excluir-disciplina");
+    if (excluirDisciplinaBtn) {
+        excluirDisciplinaBtn.addEventListener('click', (e) => {
+            e.preventDefault();
+            const nome = document.getElementById("nome-disciplina").value;
+
+            excluirdisciplina(nome).then(resultado => {
+                if(resultado && resultado.confirm){
+                    atualizardisciplinas();
+                    document.getElementById("confirm-disciplina").innerText = resultado.mensagem || "Disciplina excluída";
+                } else {
+                    document.getElementById("confirm-disciplina").innerText = resultado ? resultado.mensagem : "Erro ao excluir disciplina";
+                }
+            });
+        });
+    }
+
+    // Event listeners para turmas
+    const enviarTurmaBtn = document.getElementById("enviar-turma");
+    if (enviarTurmaBtn) {
+        enviarTurmaBtn.addEventListener('click', (e) => {
+            e.preventDefault();
+            const nome = document.getElementById("nome-turma").value;
+            const horario = document.getElementById("horario-turma").value;
+            const local = document.getElementById("local-turma").value;
+            const dia = document.getElementById("dia-turma").value;
+
+            enviarturma(nome, horario, local, dia).then(resultado => {
+                if(resultado && resultado.confirm){
+                    atualizarturmas();
+                    document.getElementById("confirm-turma").innerText = resultado.mensagem || "Turma adicionada";
+                } else {
+                    document.getElementById("confirm-turma").innerText = resultado ? resultado.mensagem : "Erro ao adicionar turma";
+                }
+            });
+        });
+    }
+
+    const excluirTurmaBtn = document.getElementById("excluir-turma");
+    if (excluirTurmaBtn) {
+        excluirTurmaBtn.addEventListener('click', (e) => {
+            e.preventDefault();
+            const nome = document.getElementById("nome-turma").value;
+
+            excluirturma(nome).then(resultado => {
+                if(resultado && resultado.confirm){
+                    atualizarturmas();
+                    document.getElementById("confirm-turma").innerText = resultado.mensagem || "Turma excluída";
+                } else {
+                    document.getElementById("confirm-turma").innerText = resultado ? resultado.mensagem : "Erro ao excluir turma";
+                }
+            });
+        });
+    }
+
+    // Event listener para adicionar aluno
+    const enviarAlunoBtn = document.getElementById("enviar-aluno");
+    if (enviarAlunoBtn) {
+        enviarAlunoBtn.addEventListener('click', (e) => {
+            e.preventDefault();
+            const matricula = document.getElementById("matricula-aluno").value;
+            const nome = document.getElementById("nome-aluno").value;
+
+            adicionaraluno(matricula, nome).then(resultado => {
+                if(resultado && resultado.confirm){
+                    atualizarnotas();
+                    const confirmAluno = document.getElementById("confirm-aluno");
+                    if (confirmAluno) {
+                        confirmAluno.innerText = resultado.mensagem || "Aluno adicionado";
+                    }
+                } else {
+                    const confirmAluno = document.getElementById("confirm-aluno");
+                    if (confirmAluno) {
+                        confirmAluno.innerText = resultado ? resultado.mensagem : "Erro ao adicionar aluno";
+                    }
+                }
+            });
+        });
+    }
+
+    // Event listener para componente
+    const enviarComponenteBtn = document.getElementById("enviar_componente");
+    if (enviarComponenteBtn) {
+        enviarComponenteBtn.addEventListener('click', (e) => {
+            e.preventDefault();
+            const nome = document.getElementById("nome-componente").value;
+            const sigla = document.getElementById("sigla-componente").value;
+            const peso = document.getElementById("peso-componente") ? document.getElementById("peso-componente").value : null;
+
+            adicionarcomponente(nome, sigla, peso).then(resultado => {
+                if(resultado && resultado.confirm){
+                    atualizarnotas();
+                    const confirmComponente = document.getElementById("confirm-componente");
+                    if (confirmComponente) {
+                        confirmComponente.innerText = resultado.mensagem || "Componente adicionado";
+                    }
+                } else {
+                    const confirmComponente = document.getElementById("confirm-componente");
+                    if (confirmComponente) {
+                        confirmComponente.innerText = resultado ? resultado.mensagem : "Erro ao adicionar componente";
+                    }
+                }
+            });
+        });
+    }
+}
+
+// ======== FLUXO DE TELAS ========
+
+//função troca tela pra outra
+function trocartela(pritela, segtela){
+    pritela.classList.add("suspenso");
+    segtela.classList.remove("suspenso");
+}
+
+//fluxo de telas
+function fluxotelas(){
+    //registro de usuários
+    const voltarLoginBtn = document.getElementById("voltar-login");
+    if (voltarLoginBtn) {
+        voltarLoginBtn.addEventListener("click", () => trocartela(
+                document.getElementById("cadastro"),
+                document.getElementById("login")
+            ));
+    }
+
+    const voltarCadastroBtn = document.getElementById("voltar-cadastro");
+    if (voltarCadastroBtn) {
+        voltarCadastroBtn.addEventListener("click", () => trocartela(
+                document.getElementById("login"),
+                document.getElementById("cadastro")
+            ));
+    }
+
+    const enviarCadastroBtn = document.getElementById("enviar-cadastro");
+    if (enviarCadastroBtn) {
+        enviarCadastroBtn.addEventListener("click", (e) => {
+            e.preventDefault();
+            comfirmarcadastro();
+        });
+    }
+
+    //disciplinas e turmas
+    const enviarLoginBtn = document.getElementById("enviar-login");
+    if (enviarLoginBtn) {
+        enviarLoginBtn.addEventListener("click", (e) => {
+            e.preventDefault();
+            comfirmarlogin().then(resultado => {
+                if(resultado && resultado.confirm){
+                    usuario = resultado.usuario;
+                    console.log(usuario);
+                    const loginConfirm = document.getElementById("login-confirm");
+                    if (loginConfirm) {
+                        loginConfirm.innerText = resultado.mensagem || "Login realizado com sucesso";
+                    }
+
+                    trocartela(
+                        document.getElementById("login"),
+                        document.getElementById("gerenciar-instituicoes"));
+
+                    atualizarinstituicoes();
+                } else {
+                    const loginConfirm = document.getElementById("login-confirm");
+                    if (loginConfirm) {
+                        loginConfirm.innerText = resultado ? resultado.mensagem : "Erro ao fazer login";
+                    }
+                    console.log(resultado ? resultado.mensagem : "Erro desconhecido");
+                }
+            });
+        });
+    }
+}
+
+// ======== GERENCIAMENTO DE TELAS ========
+
+//mostrar instituicoes
+function atualizarinstituicoes(){
+    const ins_conteiner = document.getElementById("instituicoes-conteiner");
+
+    ins_conteiner.innerHTML = '';
+
+    buscarinstituicoes().then(instituicoes => {
+        instituicoes.forEach(instituicao => {
+            const h2_ins = document.createElement("h2");
+
+            h2_ins.innerText = instituicao[1];
+            h2_ins.classList.add("instituicao");
+
+            ins_conteiner.appendChild(h2_ins);
+
+
+
+            h2_ins.addEventListener('click', (e) => {
+
+                selec_ins = instituicao;
+                
+                trocartela(
+                    document.getElementById("gerenciar-instituicoes"),
+                    document.getElementById("gerenciar-cursos")
+                );
+
+                atualizarcursos();
+            })
+        });
+    });
+}
+
+//mostrar cursos
+function atualizarcursos(){
+    const cur_conteiner = document.getElementById("cursos-conteiner");
+
+    cur_conteiner.innerHTML = '';
+
+    buscarcursos().then(cursos => {
+        cursos.forEach(curso => {
+            const h2_cur = document.createElement("h2");
+
+            h2_cur.innerText = curso[1];
+            h2_cur.classList.add("curso");
+
+            cur_conteiner.appendChild(h2_cur);
+
+            h2_cur.addEventListener('click', (e) => {
+
+                selec_cur = curso;
+                
+                trocartela(
+                    document.getElementById("gerenciar-cursos"),
+                    document.getElementById("gerenciar-disciplinas")
+                );
+
+                atualizardisciplinas();
+            })
+        });
+    });
+}
+
+//mostrar disciplinas
+function atualizardisciplinas(){
+    const dis_conteiner = document.getElementById("disciplinas-conteiner");
+
+    dis_conteiner.innerHTML = '';
+
+    buscardisciplinas().then(disciplinas => {
+        disciplinas.forEach(disciplina => {
+            const h2_dis = document.createElement("h2");
+
+            h2_dis.innerText = `${disciplina[1]}(${disciplina[2]})périodo`;
+            h2_dis.classList.add("disciplina");
+
+            dis_conteiner.appendChild(h2_dis);
+
+            h2_dis.addEventListener('click', (e) => {
+
+                selec_dis = disciplina;
+                
+                trocartela(
+                    document.getElementById("gerenciar-disciplinas"),
+                    document.getElementById("gerenciar-turmas")
+                );
+
+                atualizarturmas();
+            })
+        });
+    });
+}
+
+//mostrar turmas
+function atualizarturmas(){
+    const tur_conteiner = document.getElementById("turmas-conteiner");
+
+    tur_conteiner.innerHTML = '';
+
+    buscarturmas().then(turmas => {
+        turmas.forEach(turma => {
+            const h2_tur = document.createElement("h2");
+
+            h2_tur.innerText = `${turma[1]}`;
+            h2_tur.classList.add("turma");
+
+            tur_conteiner.appendChild(h2_tur);
+
+            h2_tur.addEventListener('click', (e) => {
+
+                selec_tur = turma;
+                
+                trocartela(
+                    document.getElementById("gerenciar-turmas"),
+                    document.getElementById("gerenciar-notas")
+                );
+
+                atualizarnotas();
+            })
+        });
+    });
+}
+
+//==gerenciamento de notas==
+//atualizar tabela
+function atualizarnotas(){
+    const tabela = document.getElementById("tabela");
+    tabela.innerHTML = ""; // limpa tabela
+
+    buscarnotas().then(informacoes => {
+        informacoes.forEach(aluno => {
+            const linha = tabela.insertRow();
+
+            linha.insertCell(0).innerText = aluno.MATRICULA;
+            linha.insertCell(1).innerText = aluno.NOME;
+            linha.insertCell(2).innerText = aluno.VALOR_FINAL;
+        });
+    });
+}
+
+//adicionar aluno
+function inseriraluno(){
+    const matricula = document.getElementById("matricula-aluno").value;
+    const nome = document.getElementById("nome-aluno").value;
+
+    adicionaraluno(nome).then(resultado => {
+        if(resultado.confirm){
+            const tabela = document.getElementById("tabela");
+            const linha = tabela.insertRow(-1);
+            linha.insertCell(0).innerText = matricula;
+            linha.insertCell(1).innerText = nome;
+        } else {
+
+        }
+    });
+
+}
+
+//adicionar componente
+async function adicionarcomponente(nome, peso, idTurma) {
+    try {
+        const response = await fetch("http://localhost:3000/adicionarcomponente", {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify({
+                nome_componente: nome,
+                peso_componente: peso,
+                id_turma: idTurma
+            })
+        });
+
+        const result = await response.json();
+        console.log("Componente adicionado:", result);
+        return result;
+    } catch (error) {
+        console.error("Erro ao adicionar componente:", error);
+    }
+}
+
+//calcular nota final
+async function calcularnotafinal(matricula) {
+    try {
+        const response = await fetch("http://localhost:3000/calcularnotafinal", {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify({ matricula })
+        });
+
+        const result = await response.json();
+        console.log("Nota final calculada:", result.valor_final);
+        return result.valor_final;
+    } catch (error) {
+        console.error("Erro ao calcular nota final:", error);
+    }
+}
+
+
+//editar nota
+async function editarnota(matricula, idComponente, novaNota) {
+    try {
+        const response = await fetch("http://localhost:3000/editarnota", {
+            method: "PUT",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify({
+                matricula: matricula,
+                id_componente: idComponente,
+                valor_nota: novaNota
+            })
+        });
+
+        const result = await response.json();
+        console.log("Nota editada:", result);
+
+        //recalcular nota final automaticamente
+        await calcularnotafinal(matricula);
+        await atualizarnotas();
+        return result;
+
+    } catch (error) {
+        console.error("Erro ao editar nota:", error);
+    }
+}
+
+
+// ======== VALIDAÇÕES E GERENCIAMENTO DE DADOS========
+//registro de usuarios
+async function comfirmarcadastro(){
+    try{
+        const nome = document.getElementById("cadastronome").value;
+        const email = document.getElementById("cadastroemail").value;
+        const senha = document.getElementById("cadastrosenha").value;
+        const telefone = document.getElementById("cadastrotelefone").value;
+
+        const response = await fetch('http://localhost:3000/cadastrar', {
+            method : "POST",
+            headers : {
+                "Content-Type" : "application/json"
+            },
+            body : JSON.stringify({nome, email, senha, telefone})
+        });
+
+        const resultado = await response.json();
+
+        document.getElementById("cadastro-resultado").innerText = resultado.message;
+
+        return resultado.confirm;
+
+    } catch(err){
+        console.log(err);
+    }
+}
+
+async function comfirmarlogin() {
+    try{
+    const email = document.getElementById("login-email").value;
+    const senha = document.getElementById("login-senha").value;
+
+    const response = await fetch('http://localhost:3000/login', {
+            method : "POST",
+            headers : {
+                "Content-Type" : "application/json"
+            },
+            body : JSON.stringify({email, senha})
+        });
+
+        const resultado = await response.json();
+
+        return resultado;
+    } catch(err){
+        console.log(err);
+    }
+}
+
+//==gerenciamento de instituições==
+//buscar instituições
+async function buscarinstituicoes(){
+    const id_usu = usuario[0];
+
+    try{
+        const response = await fetch('http://localhost:3000/buscarinstituicoes', {
+            method : "POST",
+            headers : { "Content-Type" : "application/json" },
+            body : JSON.stringify({ id_docente : id_usu })
+        });
+
+        const resultado = await response.json();
+
+        return resultado.rows;
+    } catch(err){
+        console.log(err);
+    }
+}
+
+//adicionar instituição
+async function enviarinstituicao(nome_instituicao){
+    try{
+        const response = await fetch('http://localhost:3000/adicionarinstituicao', {
+            method : "POST",
+            headers : { "Content-Type" : "application/json" },
+            body : JSON.stringify({ nome_instituicao, id_usuario : usuario[0] })
+        });
+
+        const resultado = await response.json();
+
+        return resultado;
+    } catch(err){
+        console.log(err);
+    }
+}
+
+//apagar instituição
+async function excluirinstituicao(nome_instituicao){
+    try{
+        const response = await fetch('http://localhost:3000/adicionarinstituicao', {
+            method : "POST",
+            headers : { "Content-Type" : "application/json" },
+            body : JSON.stringify({ nome_instituicao, id_usuario : usuario[0] })
+        });
+
+        const resultado = await response.json();
+
+        return resultado;
+    } catch(err){
+        console.log(err);
+    }
+}
+
+//==gerenciamento de cursos==
+//buscar cursos
+async function buscarcursos(){
+    const id_ins = selec_ins[0];
+
+    try{
+        const response = await fetch('http://localhost:3000/buscarcursos', {
+            method: 'POST',
+            headers: {
+                "Content-Type" : "application/json"
+            },
+            body: JSON.stringify({ id_ins })
+        });
+
+        const resultado = await response.json();
+
+        return resultado.rows;
+    } catch(err){
+        console.log(err);
+    }
+}
+
+//adicionar cursos
+async function enviarcurso(nome_cur){
+    const id_ins = selec_ins[0];
+
+    try{
+        const response = await fetch('http://localhost:3000/adicionarcurso', {
+            method: 'POST',
+            headers: {
+                "Content-Type" : "application/json"
+            },
+            body: JSON.stringify({ id_ins, nome_cur })
+        });
+
+        const resultado = await response.json();
+
+        return resultado;
+    } catch(err){
+        console.log(err);
+    }
+}
+
+//apagar curso
+async function excluircurso(nome_cur){
+    const id_ins = selec_ins[0];
+
+    try{
+        const response = await fetch('http://localhost:3000/apagarcurso', {
+            method: 'POST',
+            headers: {
+                "Content-Type" : "application/json"
+            },
+            body: JSON.stringify({ id_ins, nome_cur })
+        });
+
+        const resultado = await response.json();
+
+        return resultado;
+    } catch(err){
+        console.log(err);
+    }
+}
+
+//==gerenciamento de disciplinas==
+//buscar disciplinas
+async function buscardisciplinas(nome_dis){
+    const id_cur = selec_cur[0];
+
+    try{
+        const response = await fetch('http://localhost:3000/buscardisciplinas', {
+            method: 'POST',
+            headers: {
+                "Content-Type" : "application/json"
+            },
+            body: JSON.stringify({ id_cur, nome_dis })
+        });
+
+        const resultado = await response.json();
+
+        return resultado.rows;
+    } catch(err){
+        console.log(err);
+    }
+}
+
+//adicionar disciplinas
+async function enviardiscplina(sigla_dis, nome_dis, periodo_dis){
+    const id_cur = selec_cur[0];
+
+    try{
+         const response = await fetch('http://localhost:3000/adicionardisciplina', {
+            method: 'POST',
+            headers: {
+                "Content-Type" : "application/json"
+            },
+            body: JSON.stringify({ id_cur, sigla_dis, nome_dis, periodo_dis })
+        });
+
+        const resultado = await response.json();
+
+        return resultado;
+    } catch(err){
+
+    }
+}
+
+//apagar disciplinas
+async function adicionardiscplina(nome_dis){
+    const id_cur = selec_cur[0];
+
+    try{
+         const response = await fetch('http://localhost:3000/apagardisciplina', {
+            method: 'POST',
+            headers: {
+                "Content-Type" : "application/json"
+            },
+            body: JSON.stringify({ id_cur, nome_dis })
+        });
+
+        const resultado = await response.json();
+
+        return resultado;
+    } catch(err){
+
+    }
+}
+
+//==gerenciamento de turmas==
+//buscar turmas
+async function buscarturmas(){
+    const id_dis = selec_dis[0];
+
+    try{ 
+        const response = await fetch('http://localhost:3000/buscarturmas', {
+            method : "POST",
+            headers : { "Content-Type" : "application/json" },
+            body : JSON.stringify({ id_dis })
+        });
+
+        const resultado = await response.json();
+        
+        return resultado.rows;
+    } catch(err){
+        console.log(err);
+    }
+}
+
+//adicionar turma
+async function enviarturma(nome_tur, car_hor, car_dia){
+    const id_dis = selec_dis[0];
+
+    try{
+        const response = await fetch('http://localhost:3000/adicionarturma', {
+            method: 'POST',
+            headers: {
+                "Content-Type" : "application/json"
+            },
+            body: JSON.stringify({ id_dis, nome_tur, car_hor, car_dia })
+        });
+        
+        const resultado = await response.json();
+
+        return resultado.mensagem;
+    } catch(err){
+        console.log(err);
+    }
+}
+
+//excluir turma
+async function excluirturma(nome_turma){
+    id_dis = selec_dis[0];
+    try{
+        const response = await fetch('http://localhost:3000/excluirturma', {
+            method: 'POST',
+            headers: {
+                "Content-Type" : "application/json"
+            },
+            body: JSON.stringify({ nome_turma, id_dis })
+        });
+
+        const resultado = await response.json();
+        return resultado;
+    } catch(err){
+        console.log(err);
+    }
+}
+
+async function buscarnotas(){
+    const id_turma = selec_tur[0];
+    const id_disciplina = selec_dis[0];
+
+    try{
+        const response = await fetch('http://localhost:3000/buscarnotas', {
+            method : "POST",
+            headers : { "Content-Type" : "application/json" },
+            body : JSON.stringify({ id_turma })
+        });
+
+        const resultado = await response.json();
+        return resultado.rows;
+    } catch(err){
+        console.log(err);
+    }
+}
+
+async function adicionaraluno(matricula, nome){
+    const id_turma = selec_tur[0];
+    
+    try{
+        const response = await fetch('http://localhost:3000/adicionaraluno', {
+            method: 'POST',
+            headers: { "Content-Type" : "application/json" },
+            body: JSON.stringify({ matricula, nome })
+        });
+
+        const resultado = await response.json();
+
+        return resultado;
+    }catch(err){
+        console.log(err);
+    }
+
+}
+
+async function adicionarcomponente(nome, sigla, peso){
+    const id_turma = selec_tur[0];
+    const id_disciplina = selec_dis[0];
+
+    try{
+        const response = await fetch('http://localhost:3000/adicionarcomponente', {
+            method: 'POST',
+            headers: { "Content-Type" : "application/json" },
+            body: JSON.stringify({ nome, sigla, peso, id_turma })
+        });
+    } catch(err){
+        console.log(err);
+    }
+
+    const resultado = await response.json();
+
+    return resultado;
+}
+
+async function calcularnotafinal(matricula){
+    const id_turma = selec_tur[0];
+    const id_disciplina = selec_dis[0];
+
+    try{
+        const response = await fetch('http://localhost:3000/calcularnotafinal', {
+            method: 'POST',
+            headers: { "Content-Type" : "application/json" },
+            body: JSON.stringify({ matricula, id_turma, id_disciplina })
+        });
+    } catch(err){
+        console.log(err);
+    }
+
+    const resultado = await response.json();
+
+    return resultado;
+}
+
+// Inicializar tudo ao carregar a página
+// Usar DOMContentLoaded para garantir que o DOM está pronto
+function inicializar() {
+    fluxotelas();
+    inicializarEventListeners();
+}
+
+if (document.readyState === 'loading') {
+    document.addEventListener('DOMContentLoaded', inicializar);
+} else {
+    // DOM já está carregado
+    inicializar();
+}
+
+/*
+organização dos arquivos
+
+/backend
+    |-dist
+    |-src
+    |   |-server.ts
+    |-oracle.sql
+    |-package.json
+    |-package-lock.json
+    |-tsconfig.json
+/frontend
+    |-app.css
+    |-index.html
+    |-script.js
+*/
